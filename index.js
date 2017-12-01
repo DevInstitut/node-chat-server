@@ -1,16 +1,22 @@
 const ws = require('nodejs-websocket')
+console.log("Running ")
 
-const server = ws.createServer( (newConnection) => {
-    
+const server = ws.createServer((newConnection) => {
+
     console.log("Yeah ! New connection !")
-    
+    newConnection.on('error', function (err) {
+        if (err.code !== 'ECONNRESET') {
+            // Ignore ECONNRESET and re throw anything else
+            throw err
+        }
+    })
     newConnection.on("text", (msg) => {
 
-        console.log("Message received" , msg)
+        console.log("Message received", msg)
 
-        server.connections.forEach( (savedConnection) => {
+        server.connections.forEach((savedConnection) => {
             // if(connexion != conn) {
-                savedConnection.sendText(msg);
+            savedConnection.sendText(msg);
             //}
         })
     })
