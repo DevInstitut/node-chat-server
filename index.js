@@ -1,6 +1,8 @@
 const ws = require('nodejs-websocket')
 console.log("Running ")
 
+var messages = [];
+
 const server = ws.createServer((newConnection) => {
 
     console.log("Yeah ! New connection !")
@@ -10,13 +12,22 @@ const server = ws.createServer((newConnection) => {
             throw err
         }
     })
+    if (messages.length > 0) {
+        messages.forEach(msg => {
+            newConnection.sendText(msg)
+        })
+    }
     newConnection.on("text", (msg) => {
 
         console.log("Message received", msg)
-
+        var newMsg = JSON.parse(msg)
+        newMsg.date = new Date()
+        newMsgStrg = JSON.stringify(newMsg)
+        messages.push(newMsgStrg)
         server.connections.forEach((savedConnection) => {
             // if(connexion != conn) {
-            savedConnection.sendText(msg);
+
+            savedConnection.sendText(newMsgStrg);
             //}
         })
     })
