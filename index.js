@@ -9,7 +9,8 @@ const server = ws.createServer((newConnection) => {
     newConnection.on('error', function (err) {
         if (err.code !== 'ECONNRESET') {
             // Ignore ECONNRESET and re throw anything else
-            throw err
+            console.log('CATCH ERROR : ', err)
+            //throw err
         }
     })
     if (messages.length > 0) {
