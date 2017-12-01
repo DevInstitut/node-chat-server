@@ -1,16 +1,33 @@
 const ws = require('nodejs-websocket')
+console.log("Running ")
 
-const server = ws.createServer( (newConnection) => {
-    
+var messages = [];
+
+const server = ws.createServer((newConnection) => {
+
     console.log("Yeah ! New connection !")
-    
+    newConnection.on('error', function (err) {
+        if (err.code !== 'ECONNRESET') {
+            // Ignore ECONNRESET and re throw anything else
+            throw err
+        }
+    })
+    if (messages.length > 0) {
+        messages.forEach(msg => {
+            newConnection.sendText(msg)
+        })
+    }
     newConnection.on("text", (msg) => {
 
-        console.log("Message received" , msg)
-
-        server.connections.forEach( (savedConnection) => {
+        console.log("Message received", msg)
+        var newMsg = JSON.parse(msg)
+        newMsg.date = new Date()
+        newMsgStrg = JSON.stringify(newMsg)
+        messages.push(newMsgStrg)
+        server.connections.forEach((savedConnection) => {
             // if(connexion != conn) {
-                savedConnection.sendText(msg);
+
+            savedConnection.sendText(newMsgStrg);
             //}
         })
     })
