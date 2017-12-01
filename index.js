@@ -2,8 +2,19 @@ const ws = require('nodejs-websocket')
 console.log("Running ")
 
 var messages = [];
-
+var maxHistorySize = 20;
 const server = ws.createServer((newConnection) => {
+
+    function addMessage(msg) {
+        if (messages.length < maxHistorySize) {
+            messages.push(msg);
+        } else {
+            // remove the oldest message 
+            messages.splice(0, 1)
+            // add the new message
+            messages.push(msg);
+        }
+    }
 
     console.log("Yeah ! New connection !")
     newConnection.on('error', function (err) {
@@ -13,21 +24,20 @@ const server = ws.createServer((newConnection) => {
             //throw err
         }
     })
-    if (messages.length > 0) {
-        messages.forEach(msg => {
-            newConnection.sendText(msg)
-        })
-    }
+    messages.forEach(msg => {
+        newConnection.sendText(msg)
+    })
     newConnection.on("text", (msg) => {
 
         console.log("Message received", msg)
         var newMsg = JSON.parse(msg)
         newMsg.date = new Date()
         newMsgStrg = JSON.stringify(newMsg)
-        messages.push(newMsgStrg)
+
+        addMessage(newMsgStrg)
+
         server.connections.forEach((savedConnection) => {
             // if(connexion != conn) {
-
             savedConnection.sendText(newMsgStrg);
             //}
         })
